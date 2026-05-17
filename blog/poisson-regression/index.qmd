@@ -139,7 +139,7 @@ plt.close()
 
 ![Left: age distributions largely overlap. Right: Northeast is dramatically over-represented among Blueprinty customers.](fig_confounders.png)
 
-Two things should stand out to you here. First, age distributions for customers and non-customers look very similar: means of 26.9 vs. 26.1 years. So, age probably isn't driving the raw patent gap. Second, **region is a major confounder**. Nearly **68% of Blueprinty customers are in the Northeast**, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they're clustered near research universitie,s or tech corridors), that alone could explain part of the raw difference. Our analysis should control for the region.
+Two things should stand out to you here. First, age distributions for customers and non-customers look very similar: means of 26.9 vs. 26.1 years. So, age probably isn't driving the raw patent gap. Second, **region is a major confounder**. Nearly **68% of Blueprinty customers are in the Northeast**, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they're clustered near research universities, or tech corridors), that alone could explain part of the raw difference. Our analysis should control for the region.
 
 ---
 
