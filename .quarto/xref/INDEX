@@ -28,5 +28,8 @@
   },
   "blog/diff_diff/index.qmd": {
     "index.html": "011e30f0"
+  },
+  "blog/poisson-regression/index.qmd": {
+    "index.html": "0517269d"
   }
 }

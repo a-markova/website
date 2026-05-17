@@ -9,6 +9,7 @@
   {
     "listing": "/blog/index.html",
     "items": [
+      "/blog/poisson-regression/index.html",
       "/blog/diff_diff/index.html",
       "/blog/ab_testing/index.html"
     ]
