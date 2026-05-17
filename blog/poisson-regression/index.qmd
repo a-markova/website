@@ -47,11 +47,11 @@ df = pd.read_csv("blueprinty.csv")
 
 ## Introduction
 
-Blueprinty makes software that helps engineering firms prepare and submit patent applications. Their marketing team wants to make a compelling claim: firms that use Blueprinty win more patents. If true, that's a powerful selling point. The problem is that proving it is harder than it looks.
+Blueprinty makes software that helps engineering firms prepare and submit patent applications. Their marketing team wants to make a compelling claim: firms that use Blueprinty win more patents. If true, this could be a powerful selling point. The problem? How do we prove this...
 
-The ideal study would be a randomized experiment — some firms use the software, some don't, and we compare outcomes. But that's not what Blueprinty has. Instead, they've collected observational data on **1,500 mature engineering firms**, recording the number of patents each firm was awarded over the last five years, each firm's region, its age since incorporation, and whether it's a Blueprinty customer.
+The ideal study would be a randomized experiment, where some firms use the software, and some don't. We'd compare the outcomes of both. But that's not what Blueprinty has. Instead, they've collected observational data on **1,500 mature engineering firms**, recording the number of patents each firm was awarded over the last five years, each firm's region, its age since incorporation, and whether it's a Blueprinty customer (!).
 
-The key complication: Blueprinty's customers self-selected into using the product. They didn't flip a coin. That means any raw difference in patent counts between customers and non-customers could reflect the fact that, say, customers tend to be in regions with more patent activity, or that they're newer firms with more to prove. Before we can say anything credible about the software's effect, we need to account for those confounders — which is exactly what Poisson regression lets us do.
+With a key complication... Blueprinty's customers self-selected into using the product. There was no randomization. That means any raw difference in patent counts between customers and non-customers could reflect the fact that, say, customers tend to be in regions with more patent activity, or that they're newer firms with more to prove. Before we can say anything credible about the software's effect, we need to account for those confounders. That's what poisson regression is going to help with.
 
 ---
 
@@ -89,7 +89,7 @@ plt.close()
 
 ![Patent count distributions for customers vs. non-customers. Vertical dashed lines mark group means.](fig_histograms.png)
 
-Blueprinty customers average **4.13 patents** over the five-year window, compared to **3.47** for non-customers — a gap of about 0.66 patents. Both distributions are right-skewed and peak around 3–4 patents, which is exactly the shape we'd expect from count data. But the raw mean difference doesn't tell us whether the software caused the gap. To figure that out, we first need to look at who the customers actually are.
+Blueprinty customers average **4.13 patents** over the five-year window, compared to **3.47** for non-customers; a gap of ~ 0.66 patents. Both distributions are right-skewed and peak around 3–4 patents. But the raw mean difference doesn't tell us whether the software caused the gap (remember those confounds?). To figure that out, we first need to look at who the customers actually are.
 
 ### Are customers systematically different?
 
@@ -139,13 +139,15 @@ plt.close()
 
 ![Left: age distributions largely overlap. Right: Northeast is dramatically over-represented among Blueprinty customers.](fig_confounders.png)
 
-Two things stand out. First, age distributions for customers and non-customers look very similar — means of 26.9 vs. 26.1 years — so age probably isn't driving the raw patent gap. Second, **region is a major confounder**. Nearly **68% of Blueprinty customers are in the Northeast**, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they're clustered near research universities or tech corridors), that alone could explain part of the raw difference. Any credible analysis needs to account for region.
+Two things should stand out to you here. First, age distributions for customers and non-customers look very similar: means of 26.9 vs. 26.1 years. So, age probably isn't driving the raw patent gap. Second, **region is a major confounder**. Nearly **68% of Blueprinty customers are in the Northeast**, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they're clustered near research universitie,s or tech corridors), that alone could explain part of the raw difference. Our analysis should control for the region.
 
 ---
 
 ## A Simple Poisson Model via Maximum Likelihood
 
-Patent counts are non-negative integers — they can't be negative, and they're discrete. A Normal distribution is a poor fit for this kind of outcome: it assigns probability to negative values and treats fractional counts as plausible. The **Poisson distribution** is the natural starting point for count data. It's parameterized by a single rate $\lambda > 0$, which equals both the mean and variance of the distribution.
+Warning: The Math Section
+
+Patent counts are non-negative integers; they can't be negative, and they're discrete. A Normal distribution is a poor fit for this kind of outcome - it assigns probability to negative values, and allows for fractional counts. The **Poisson distribution** is the next natural starting point for count data. It's parameterized by a single rate $\lambda > 0$, which equals both the mean and variance of the distribution.
 
 ### Deriving the likelihood
 

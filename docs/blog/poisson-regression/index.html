@@ -262,9 +262,9 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Blueprinty makes software that helps engineering firms prepare and submit patent applications. Their marketing team wants to make a compelling claim: firms that use Blueprinty win more patents. If true, that’s a powerful selling point. The problem is that proving it is harder than it looks.</p>
-<p>The ideal study would be a randomized experiment — some firms use the software, some don’t, and we compare outcomes. But that’s not what Blueprinty has. Instead, they’ve collected observational data on <strong>1,500 mature engineering firms</strong>, recording the number of patents each firm was awarded over the last five years, each firm’s region, its age since incorporation, and whether it’s a Blueprinty customer.</p>
-<p>The key complication: Blueprinty’s customers self-selected into using the product. They didn’t flip a coin. That means any raw difference in patent counts between customers and non-customers could reflect the fact that, say, customers tend to be in regions with more patent activity, or that they’re newer firms with more to prove. Before we can say anything credible about the software’s effect, we need to account for those confounders — which is exactly what Poisson regression lets us do.</p>
+<p>Blueprinty makes software that helps engineering firms prepare and submit patent applications. Their marketing team wants to make a compelling claim: firms that use Blueprinty win more patents. If true, this could be a powerful selling point. The problem? How do we prove this…</p>
+<p>The ideal study would be a randomized experiment, where some firms use the software, and some don’t. We’d compare the outcomes of both. But that’s not what Blueprinty has. Instead, they’ve collected observational data on <strong>1,500 mature engineering firms</strong>, recording the number of patents each firm was awarded over the last five years, each firm’s region, its age since incorporation, and whether it’s a Blueprinty customer (!).</p>
+<p>With a key complication… Blueprinty’s customers self-selected into using the product. There was no randomization. That means any raw difference in patent counts between customers and non-customers could reflect the fact that, say, customers tend to be in regions with more patent activity, or that they’re newer firms with more to prove. Before we can say anything credible about the software’s effect, we need to account for those confounders. That’s what poisson regression is going to help with.</p>
 <hr>
 </section>
 <section id="exploring-the-data" class="level2">
@@ -275,7 +275,7 @@ window.Quarto = {
 <figcaption>Patent count distributions for customers vs.&nbsp;non-customers. Vertical dashed lines mark group means.</figcaption>
 </figure>
 </div>
-<p>Blueprinty customers average <strong>4.13 patents</strong> over the five-year window, compared to <strong>3.47</strong> for non-customers — a gap of about 0.66 patents. Both distributions are right-skewed and peak around 3–4 patents, which is exactly the shape we’d expect from count data. But the raw mean difference doesn’t tell us whether the software caused the gap. To figure that out, we first need to look at who the customers actually are.</p>
+<p>Blueprinty customers average <strong>4.13 patents</strong> over the five-year window, compared to <strong>3.47</strong> for non-customers; a gap of ~ 0.66 patents. Both distributions are right-skewed and peak around 3–4 patents. But the raw mean difference doesn’t tell us whether the software caused the gap (remember those confounds?). To figure that out, we first need to look at who the customers actually are.</p>
 <section id="are-customers-systematically-different" class="level3">
 <h3 class="anchored" data-anchor-id="are-customers-systematically-different">Are customers systematically different?</h3>
 <div class="quarto-figure quarto-figure-center">
@@ -284,13 +284,14 @@ window.Quarto = {
 <figcaption>Left: age distributions largely overlap. Right: Northeast is dramatically over-represented among Blueprinty customers.</figcaption>
 </figure>
 </div>
-<p>Two things stand out. First, age distributions for customers and non-customers look very similar — means of 26.9 vs.&nbsp;26.1 years — so age probably isn’t driving the raw patent gap. Second, <strong>region is a major confounder</strong>. Nearly <strong>68% of Blueprinty customers are in the Northeast</strong>, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they’re clustered near research universities or tech corridors), that alone could explain part of the raw difference. Any credible analysis needs to account for region.</p>
+<p>Two things should stand out to you here. First, age distributions for customers and non-customers look very similar: means of 26.9 vs.&nbsp;26.1 years. So, age probably isn’t driving the raw patent gap. Second, <strong>region is a major confounder</strong>. Nearly <strong>68% of Blueprinty customers are in the Northeast</strong>, versus only 27% of non-customers. If Northeastern firms tend to file more patents regardless of software (perhaps because they’re clustered near research universitie,s or tech corridors), that alone could explain part of the raw difference. Our analysis should control for the region.</p>
 <hr>
 </section>
 </section>
 <section id="a-simple-poisson-model-via-maximum-likelihood" class="level2">
 <h2 class="anchored" data-anchor-id="a-simple-poisson-model-via-maximum-likelihood">A Simple Poisson Model via Maximum Likelihood</h2>
-<p>Patent counts are non-negative integers — they can’t be negative, and they’re discrete. A Normal distribution is a poor fit for this kind of outcome: it assigns probability to negative values and treats fractional counts as plausible. The <strong>Poisson distribution</strong> is the natural starting point for count data. It’s parameterized by a single rate <span class="math inline">\(\lambda &gt; 0\)</span>, which equals both the mean and variance of the distribution.</p>
+<p>Warning: The Math Section</p>
+<p>Patent counts are non-negative integers; they can’t be negative, and they’re discrete. A Normal distribution is a poor fit for this kind of outcome - it assigns probability to negative values, and allows for fractional counts. The <strong>Poisson distribution</strong> is the next natural starting point for count data. It’s parameterized by a single rate <span class="math inline">\(\lambda &gt; 0\)</span>, which equals both the mean and variance of the distribution.</p>
 <section id="deriving-the-likelihood" class="level3">
 <h3 class="anchored" data-anchor-id="deriving-the-likelihood">Deriving the likelihood</h3>
 <p>If each firm’s patent count <span class="math inline">\(Y_i\)</span> is an independent draw from <span class="math inline">\(\text{Poisson}(\lambda)\)</span>, the probability of observing a single count is:</p>
@@ -317,7 +318,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 </section>
 <section id="visualizing-the-log-likelihood" class="level3">
 <h3 class="anchored" data-anchor-id="visualizing-the-log-likelihood">Visualizing the log-likelihood</h3>
-<div id="fbee8d2c" class="cell" data-execution_count="4">
+<div id="9e04d6d1" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">"patents"</span>].values</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_loglik(lam, Y):</span>
@@ -337,7 +338,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 </section>
 <section id="numerical-confirmation" class="level3">
 <h3 class="anchored" data-anchor-id="numerical-confirmation">Numerical confirmation</h3>
-<div id="395abea9" class="cell" data-execution_count="6">
+<div id="d1ebc27f" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>result_simple <span class="op">=</span> optimize.minimize_scalar(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> lam: <span class="op">-</span>poisson_loglik(lam, Y),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    bounds<span class="op">=</span>(<span class="fl">0.1</span>, <span class="dv">20</span>),</span>
@@ -345,7 +346,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>lambda_mle <span class="op">=</span> result_simple.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="3dc6a0bc" class="cell" data-execution_count="7">
+<div id="faf53754" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code>Numerical MLE (scipy):  3.684667
 Sample mean (analytic): 3.684667</code></pre>
@@ -365,7 +366,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <section id="building-the-covariate-matrix" class="level3">
 <h3 class="anchored" data-anchor-id="building-the-covariate-matrix">Building the covariate matrix</h3>
 <p>The design matrix <span class="math inline">\(X\)</span> includes: - An <strong>intercept</strong> column of ones - <strong>Firm age</strong> and <strong>age squared</strong> — the relationship between age and patenting is likely nonlinear (young firms ramp up, very old ones may stagnate), so including the quadratic term lets the model capture that curvature - <strong>Region dummies</strong> for Northeast, Northwest, South, and Southwest, with Midwest as the omitted baseline — we must drop one region to avoid perfect collinearity with the intercept - The <strong>customer indicator</strong> — the variable we care most about</p>
-<div id="e6c6a27d" class="cell" data-execution_count="8">
+<div id="fc892f50" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>region_dummies <span class="op">=</span> pd.get_dummies(df[<span class="st">"region"</span>], drop_first<span class="op">=</span><span class="va">True</span>, prefix<span class="op">=</span><span class="st">"region"</span>).astype(<span class="bu">float</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.concat([</span>
@@ -381,7 +382,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <section id="log-likelihood-for-poisson-regression" class="level3">
 <h3 class="anchored" data-anchor-id="log-likelihood-for-poisson-regression">Log-likelihood for Poisson regression</h3>
 <p>The log-likelihood extends naturally from the simple case — we just replace the scalar <span class="math inline">\(\lambda\)</span> with the vector <span class="math inline">\(\lambda_i = \exp(X_i'\beta)\)</span>:</p>
-<div id="26ba26f5" class="cell" data-execution_count="9">
+<div id="1a16bd3c" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_reg_loglik(beta, Y, X):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Xb  <span class="op">=</span> np.clip(X.values <span class="op">@</span> beta, <span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)   <span class="co"># clip for numerical stability</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    lam <span class="op">=</span> np.exp(Xb)</span>
@@ -390,7 +391,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 </section>
 <section id="finding-the-mle-with-scipy.optimize" class="level3">
 <h3 class="anchored" data-anchor-id="finding-the-mle-with-scipy.optimize">Finding the MLE with <code>scipy.optimize</code></h3>
-<div id="ea961296" class="cell" data-execution_count="10">
+<div id="3227e945" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>beta_init <span class="op">=</span> np.zeros(X.shape[<span class="dv">1</span>])</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> optimize.minimize(</span>
@@ -402,7 +403,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>beta_optim <span class="op">=</span> res.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="87c4c410" class="cell" data-execution_count="11">
+<div id="37656570" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>Optimization converged: False
 Coefficients: {'const': -0.50999, 'age': 0.14871, 'age_sq': -0.00297, 'iscustomer': 0.20761, 'region_Northeast': 0.02916, 'region_Northwest': -0.01758, 'region_South': 0.05657, 'region_Southwest': 0.05057}</code></pre>
@@ -411,11 +412,11 @@ Coefficients: {'const': -0.50999, 'age': 0.14871, 'age_sq': -0.00297, 'iscustome
 </section>
 <section id="checking-against-statsmodels" class="level3">
 <h3 class="anchored" data-anchor-id="checking-against-statsmodels">Checking against <code>statsmodels</code></h3>
-<div id="474a0bfa" class="cell" data-execution_count="12">
+<div id="3b86d853" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>glm_model  <span class="op">=</span> sm.GLM(Y_reg, X, family<span class="op">=</span>sm.families.Poisson())</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>glm_result <span class="op">=</span> glm_model.fit()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="7bbad1c3" class="cell" data-execution_count="13">
+<div id="e61d4d60" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-stdout">
 <pre><code>         Variable Coefficient Std. Error z-statistic p-value
         Intercept     -0.5089     0.1832       -2.78   0.005
@@ -450,7 +451,7 @@ Region: Southwest      0.0506     0.0472        1.07   0.284</code></pre>
 <section id="the-effect-of-blueprintys-software" class="level2">
 <h2 class="anchored" data-anchor-id="the-effect-of-blueprintys-software">The Effect of Blueprinty’s Software</h2>
 <p>A coefficient alone doesn’t tell us how many more patents a firm would expect to win if it became a Blueprinty customer. To get that, we construct two counterfactual worlds:</p>
-<div id="8268899c" class="cell" data-execution_count="15">
+<div id="e8cabe52" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X0 <span class="op">=</span> X.copy()<span class="op">;</span> X0[<span class="st">"iscustomer"</span>] <span class="op">=</span> <span class="fl">0.0</span>   <span class="co"># everyone is a non-customer</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>X1 <span class="op">=</span> X.copy()<span class="op">;</span> X1[<span class="st">"iscustomer"</span>] <span class="op">=</span> <span class="fl">1.0</span>   <span class="co"># everyone is a customer</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
