@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Alina Markova">
-<meta name="dcterms.date" content="2026-05-17">
+<meta name="dcterms.date" content="2026-05-27">
 
 <title>Poisson Regression and Maximum Likelihood Estimation – Alina Markova</title>
 <style>
@@ -248,7 +248,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 17, 2026</p>
+      <p class="date">May 27, 2026</p>
     </div>
   </div>
   
@@ -318,7 +318,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 </section>
 <section id="visualizing-the-log-likelihood" class="level3">
 <h3 class="anchored" data-anchor-id="visualizing-the-log-likelihood">Visualizing the log-likelihood</h3>
-<div id="62892a61" class="cell" data-execution_count="4">
+<div id="baa3dd6a" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Y <span class="op">=</span> df[<span class="st">"patents"</span>].values</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_loglik(lam, Y):</span>
@@ -338,7 +338,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 </section>
 <section id="numerical-confirmation" class="level3">
 <h3 class="anchored" data-anchor-id="numerical-confirmation">Numerical confirmation</h3>
-<div id="77f52019" class="cell" data-execution_count="6">
+<div id="d8c4c78c" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>result_simple <span class="op">=</span> optimize.minimize_scalar(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> lam: <span class="op">-</span>poisson_loglik(lam, Y),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    bounds<span class="op">=</span>(<span class="fl">0.1</span>, <span class="dv">20</span>),</span>
@@ -346,7 +346,7 @@ L(\lambda \mid \mathbf{Y}) = \prod_{i=1}^{n} \frac{e^{-\lambda} \lambda^{Y_i}}{Y
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>lambda_mle <span class="op">=</span> result_simple.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="26dc0a07" class="cell" data-execution_count="7">
+<div id="9b4b9519" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-stdout">
 <pre><code>Numerical MLE (scipy):  3.684667
 Sample mean (analytic): 3.684667</code></pre>
@@ -366,7 +366,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <section id="building-the-covariate-matrix" class="level3">
 <h3 class="anchored" data-anchor-id="building-the-covariate-matrix">Building the covariate matrix</h3>
 <p>The design matrix <span class="math inline">\(X\)</span> includes: - An <strong>intercept</strong> column of ones - <strong>Firm age</strong> and <strong>age squared</strong> — the relationship between age and patenting is likely nonlinear (young firms ramp up, very old ones may stagnate), so including the quadratic term lets the model capture that curvature - <strong>Region dummies</strong> for Northeast, Northwest, South, and Southwest, with Midwest as the omitted baseline — we must drop one region to avoid perfect collinearity with the intercept - The <strong>customer indicator</strong> — the variable we care most about</p>
-<div id="50f480ca" class="cell" data-execution_count="8">
+<div id="0b4fa8b9" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>region_dummies <span class="op">=</span> pd.get_dummies(df[<span class="st">"region"</span>], drop_first<span class="op">=</span><span class="va">True</span>, prefix<span class="op">=</span><span class="st">"region"</span>).astype(<span class="bu">float</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.concat([</span>
@@ -382,7 +382,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <section id="log-likelihood-for-poisson-regression" class="level3">
 <h3 class="anchored" data-anchor-id="log-likelihood-for-poisson-regression">Log-likelihood for Poisson regression</h3>
 <p>The log-likelihood extends naturally from the simple case — we just replace the scalar <span class="math inline">\(\lambda\)</span> with the vector <span class="math inline">\(\lambda_i = \exp(X_i'\beta)\)</span>:</p>
-<div id="4929d8bd" class="cell" data-execution_count="9">
+<div id="85c70478" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> poisson_reg_loglik(beta, Y, X):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    Xb  <span class="op">=</span> np.clip(X.values <span class="op">@</span> beta, <span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)   <span class="co"># clip for numerical stability</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    lam <span class="op">=</span> np.exp(Xb)</span>
@@ -391,7 +391,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 </section>
 <section id="finding-the-mle-with-scipy.optimize" class="level3">
 <h3 class="anchored" data-anchor-id="finding-the-mle-with-scipy.optimize">Finding the MLE with <code>scipy.optimize</code></h3>
-<div id="baa77945" class="cell" data-execution_count="10">
+<div id="38283d88" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>beta_init <span class="op">=</span> np.zeros(X.shape[<span class="dv">1</span>])</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> optimize.minimize(</span>
@@ -403,7 +403,7 @@ Y_i \sim \text{Poisson}(\lambda_i), \qquad \lambda_i = \exp(X_i'\beta)
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>beta_optim <span class="op">=</span> res.x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="2245e766" class="cell" data-execution_count="11">
+<div id="5c59b0a3" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-stdout">
 <pre><code>Optimization converged: False
 Coefficients: {'const': -0.50999, 'age': 0.14871, 'age_sq': -0.00297, 'iscustomer': 0.20761, 'region_Northeast': 0.02916, 'region_Northwest': -0.01758, 'region_South': 0.05657, 'region_Southwest': 0.05057}</code></pre>
@@ -412,11 +412,11 @@ Coefficients: {'const': -0.50999, 'age': 0.14871, 'age_sq': -0.00297, 'iscustome
 </section>
 <section id="checking-against-statsmodels" class="level3">
 <h3 class="anchored" data-anchor-id="checking-against-statsmodels">Checking against <code>statsmodels</code></h3>
-<div id="05ebc19e" class="cell" data-execution_count="12">
+<div id="8c5bb98e" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>glm_model  <span class="op">=</span> sm.GLM(Y_reg, X, family<span class="op">=</span>sm.families.Poisson())</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>glm_result <span class="op">=</span> glm_model.fit()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="38e1da7e" class="cell" data-execution_count="13">
+<div id="2fa6b06c" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-stdout">
 <pre><code>         Variable Coefficient Std. Error z-statistic p-value
         Intercept     -0.5089     0.1832       -2.78   0.005
@@ -451,7 +451,7 @@ Region: Southwest      0.0506     0.0472        1.07   0.284</code></pre>
 <section id="the-effect-of-blueprintys-software" class="level2">
 <h2 class="anchored" data-anchor-id="the-effect-of-blueprintys-software">The Effect of Blueprinty’s Software</h2>
 <p>A coefficient alone doesn’t tell us how many more patents a firm would expect to win if it became a Blueprinty customer. To get that, we construct two counterfactual worlds:</p>
-<div id="b6ffaa69" class="cell" data-execution_count="15">
+<div id="416ffc9f" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X0 <span class="op">=</span> X.copy()<span class="op">;</span> X0[<span class="st">"iscustomer"</span>] <span class="op">=</span> <span class="fl">0.0</span>   <span class="co"># everyone is a non-customer</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>X1 <span class="op">=</span> X.copy()<span class="op">;</span> X1[<span class="st">"iscustomer"</span>] <span class="op">=</span> <span class="fl">1.0</span>   <span class="co"># everyone is a customer</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>

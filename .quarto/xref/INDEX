@@ -31,5 +31,8 @@
   },
   "blog/poisson-regression/index.qmd": {
     "index.html": "0517269d"
+  },
+  "blog/max_diff/index.qmd": {
+    "index.html": "07b2df39"
   }
 }
